@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - pake-zhihu-build-20260921
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
