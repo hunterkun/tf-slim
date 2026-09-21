@@ -1,0 +1,48 @@
+name: Build Zhihu with Pake
+
+on:
+  push:
+    branches:
+      - pake-zhihu-build-20260921
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare Rust targets
+        shell: bash
+        run: |
+          rustup target add x86_64-apple-darwin aarch64-apple-darwin
+
+      - name: Install Pake
+        shell: bash
+        run: npm install -g pake-cli@3.17.0
+
+      - name: Build Zhihu universal DMG
+        shell: bash
+        run: |
+          mkdir -p build
+          cd build
+          pake 'https://www.zhihu.com/' \
+            --name 'Zhihu' \
+            --width 1280 \
+            --height 900 \
+            --targets universal \
+            --safe-domain 'zhihu.com' \
+            --enable-find \
+            --json
+          ls -lah
+
+      - name: Upload Zhihu DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zhihu-Pake-macOS-universal
+          path: build/*.dmg
+          if-no-files-found: error
+          retention-days: 7
